@@ -1,22 +1,22 @@
-import e from "express";
-import ExpressError from "../common/error";
-import { userRole } from "../common/object";
-import { ExpressResponse } from "../common/success.handler";
-import Admin from "../model/admin.model";
-import Staff from "../model/staff.model";
-import { CreateJWT } from "../utils/jwtToken";
-import { hashString } from "../utils/hash";
+import ExpressError from "../common/error.js";
+import { userRole } from "../common/object.js";
+import { ExpressResponse } from "../common/success.handler.js";
+import Admin from "../model/admin.model.js";
+import Staff from "../model/staff.model.js";
+import { hashString } from "../utils/hash.js";
+import { CreateJWT } from "../utils/jwtToken.js";
 
 class UserService {
-  async login(req, res) {
+  async login(req, res, next) {
     try {
       const { email, password, role } = req.body;
       switch (role) {
         case userRole.ADMIN:
-          const admin = await Admin.findOne({ email });
+          const admin = await Admin.findOne({ email }).select("+password");
           if (admin) {
+             
             if (admin.password === hashString(password)) {
-              const token = CreateJWT({ id: admin._id, email: admin.email, role: userRole.ADMIN });
+               const token =  CreateJWT({ id: admin._id, email: admin.email, role: userRole.ADMIN });
               return ExpressResponse.success(res, {
                 message: "Login successfully",
                 data: { token },
@@ -60,7 +60,7 @@ class UserService {
     }
   }
 
-  async staffRegister(req, res) {
+  async staffRegister(req, res, next) {
     try {
       const { email, password, role } = req.body;
 

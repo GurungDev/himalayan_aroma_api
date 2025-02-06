@@ -15,7 +15,7 @@ const uploadImage = (isNeeded = true) => {
 
     const uploadToCloudinary = async (req, res, next) => {
         try {
-            upload(req, res, async (err) => {
+            upload(req, res, next, async (err) => {
                 if (err) {
                     return res.status(400).json({ error: "Failed to upload image." });
                 }

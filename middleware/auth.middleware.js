@@ -1,14 +1,10 @@
 import ExpressError from "../common/error.js";
-import User from "../model/user.model.js";
 
-async function checkIfUserExists(req, res, next) {
+async function allowAdminOnly(req, res, next) {
   try {
-    if (!req?.user) {
-      throw new ExpressError(401, `Not authenticated.`);
-    }
-    const existingUser = await User.findById(req?.user?._id);
-    if (!existingUser) {
-      throw new ExpressError(401, `Invalid user. Relogin`);
+    const { role } = req.user;
+    if (role !== "admin") {
+      throw new ExpressError(400, "You are not authorized");
     }
     next();
   } catch (error) {
@@ -16,4 +12,4 @@ async function checkIfUserExists(req, res, next) {
   }
 }
 
-export const authenticateUser = [checkIfUserExists];
+export { allowAdminOnly };

@@ -1,10 +1,14 @@
-import ExpressError from "../common/error";
-import paginationInfo from "../common/paginationInfo";
-import { ExpressResponse } from "../common/success.handler";
-import Menu from "../model/menu.model";
+import ExpressError from "../common/error.js";
+import paginationInfo from "../common/paginationInfo.js";
+import { ExpressResponse } from "../common/success.handler.js";
+import Menu from "../model/menu.model.js";
 
 class MenuController {
-  async getAll(req, res) {
+
+
+
+ 
+  async getAll(req, res, next) {
     try {
       const { page = 1, limit = 20 } = req.query;
       const { name, isSpecial, isAvailable } = req.body;
@@ -15,7 +19,7 @@ class MenuController {
       if (isAvailable) query.isAvailable = isAvailable;
       const [responseMenu, countMenu] = await Promise.all([
         Menu.find(query).limit(limit).skip(skip).lean(),
-        Menu.count(),
+        Menu.countDocuments(),
       ]);
       return ExpressResponse.success(res, {
         data: responseMenu,
@@ -26,7 +30,7 @@ class MenuController {
     }
   }
 
-  async getById(req, res) {
+  async getById(req, res, next) {
     try {
       const { id } = req.params;
       const menu = await Menu.findById(id).lean();
@@ -36,11 +40,14 @@ class MenuController {
     }
   }
 
-  async create(req, res) {
+  async create(req, res, next) {
     try {
       const { name, price, description, isSpecial = false } = req.body;
       if (!name || !price) {
         throw new ExpressError(400, "All fields are required");
+      }
+      if (await Menu.findOne({ name })) {
+        throw new ExpressError(400, "Menu item already exists");
       }
       const newMenu = await Menu.create({
         name,
@@ -54,11 +61,11 @@ class MenuController {
     }
   }
 
-  async update(req, res) {
+  async update(req, res, next) {
     try {
       const { id } = req.params;
       const { name, price, description, isSpecial } = req.body;
-      let menu = await Menu.findById(id).lean();
+      let menu = await Menu.findById(id);
       if (!menu) {
         throw new ExpressError(404, "Menu item not found");
       }

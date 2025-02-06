@@ -1,9 +1,9 @@
-import ExpressError from "../common/error";
-import { ExpressResponse } from "../common/success.handler";
-import Table from "../model/table.model";
+import ExpressError from "../common/error.js";
+import { ExpressResponse } from "../common/success.handler.js";
+import Table from "../model/table.model.js";
 
 class TableController {
-  async getAll(req, res) {
+  async getAll(req, res, next) {
     try {
       const responseTable = await Table.find().lean();
       return ExpressResponse.success(res, {
@@ -14,7 +14,7 @@ class TableController {
     }
   }
 
-  async getById(req, res) {
+  async getById(req, res, next) {
     try {
       const { id } = req.params;
       const table = await Table.findById(id).lean();
@@ -24,7 +24,7 @@ class TableController {
     }
   }
 
-  async create(req, res) {
+  async create(req, res, next) {
     try {
       const { table_number, capacity } = req.body;
       const newTable = await Table.create({ table_number, capacity });
@@ -34,16 +34,31 @@ class TableController {
     }
   }
 
-  async update(req, res) {
+  async update(req, res, next) {
     try {
       const { id } = req.params;
       const { table_number, capacity } = req.body;
-      let table = await Table.findById(id).lean();
+      let table = await Table.findById(id) ;
       if (!table) {
         throw new ExpressError(404, "Table not found");
       }
       table.table_number = table_number || table.table_number;
       table.capacity = capacity || table.capacity;
+      const updatedTable = await table.save();
+      return ExpressResponse.success(res, { data: updatedTable });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async toogleReserveTable(req, res, next) {
+    try {
+      const { id } = req.params;
+       let table = await Table.findById(id) ;
+      if (!table) {
+        throw new ExpressError(404, "Table not found");
+      }
+      table.isReserved = !table.isReserved;
       const updatedTable = await table.save();
       return ExpressResponse.success(res, { data: updatedTable });
     } catch (error) {

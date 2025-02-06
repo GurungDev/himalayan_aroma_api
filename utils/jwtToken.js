@@ -14,10 +14,11 @@ export  function verifyJWT(token) {
 
 export  function CreateJWT(token) {
   try {
-    const token = jwt.sign(token, secretKey,{
+    const newToken = jwt.sign(token, secretKey,{
       expiresIn: 8640000,
     } );
-    return token;
+  
+    return newToken;
   } catch (error) {
     return false;
   }

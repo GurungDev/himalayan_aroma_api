@@ -1,12 +1,12 @@
-import ExpressError from "../common/error";
-import { userRole } from "../common/object";
-import paginationInfo from "../common/paginationInfo";
-import { ExpressResponse } from "../common/success.handler";
-import Staff from "../model/staff.model";
-import { hashString } from "../utils/hash";
+import ExpressError from "../common/error.js";
+import { userRole } from "../common/object.js";
+import paginationInfo from "../common/paginationInf.js";
+import { ExpressResponse } from "../common/success.handler.js";
+import Staff from "../model/staff.model.js";
+import { hashString } from "../utils/hash.js";
 
 class staffController {
-  async getAll(req, res) {
+  async getAll(req, res, next) {
     try {
       const { role, status, name } = req.query;
       const { page = 1, limit = 20 } = req.query;
@@ -30,7 +30,7 @@ class staffController {
     }
   }
 
-  async getById(req, res) {
+  async getById(req, res, next) {
     try {
       const { id } = req.params;
       const staff = await Staff.findById(id).lean();
@@ -40,7 +40,7 @@ class staffController {
     }
   }
 
-  async getByEmail(req, res) {
+  async getByEmail(req, res, next) {
     try {
       const { email } = req.params;
       const staff = await Staff.findOne({ email }).lean();
@@ -50,7 +50,7 @@ class staffController {
     }
   }
 
-  async update(req, res) {
+  async update(req, res, next) {
     try {
       const { id } = req.params;
       let hashedPassword;
@@ -94,7 +94,7 @@ class staffController {
     }
   }
 
-  async delete(req, res) {
+  async delete(req, res, next) {
     try {
       const { id } = req.params;
       const staff = await Staff.findByIdAndDelete(id).lean();

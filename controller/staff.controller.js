@@ -82,7 +82,7 @@ class staffController {
         if(req.user.role != userRole.ADMIN){
             throw new ExpressError(400, "You are not permitted to perform this action");
         }
-        if (!["ACTIVE", "INACTIVE"].includes(req.body.status)) {
+        if (typeof req.body.status !== Boolean) {
           throw new ExpressError(400, "Invalid status");
         }
         staff.status = req.body.status;

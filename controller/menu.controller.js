@@ -55,6 +55,8 @@ class MenuController {
         description,
         isSpecial,
       });
+
+      await newMenu.save();
       return ExpressResponse.success(res, { data: newMenu });
     } catch (error) {
       next(error);

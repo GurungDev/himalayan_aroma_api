@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { Schema, model } from "mongoose";
 import ExpressError from "../common/error.js";
-import { staff } from "../common/object.js";
+import { staffRole } from "../common/object.js";
 
 const staffSchema = new Schema(
   {
@@ -17,14 +17,13 @@ const staffSchema = new Schema(
     },
     role: {
       type: String,
-      enum: Object.values(staff),
+      enum: Object.values(staffRole),
       required: true,
     },
     status: {
-      type: String,
-      enum: ["ACTIVE", "INACTIVE"],
+      type: Boolean,
       required: true,
-      default: "ACTIVE",
+      default: false,
     },
     email: {
       type: String,

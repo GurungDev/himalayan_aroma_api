@@ -1,4 +1,4 @@
-export const staff = {
+export const staffRole = {
     CHEF: "chef",
     WAITER: "waiter",
     CASHIER: "Cashier"
@@ -8,6 +8,11 @@ export const userRole = {
   ADMIN: "admin",
   STAFF: "staff"
 }
+
+export const OtpPurpose = {
+  REGISTER: "register",
+  FORGOT_PASSWORD: "forgotPassword",
+};
 
 export const orderStatus = {
     PENDING: "pending",

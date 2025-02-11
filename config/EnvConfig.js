@@ -1,4 +1,5 @@
  import { config } from "dotenv";
+import ExpressError from "../common/error.js";
 
 config();
 
@@ -10,6 +11,11 @@ export default class EnvConfig {
   static jwtSecret = this.#getString(this.#getFromEnv("JWT_SECRET"));
   static hashKey = this.#getString(this.#getFromEnv("HASH_KEY"));
   static adminPassword = this.#getString(this.#getFromEnv("ADMIN_PASSWORD"));
+
+  static sendgridApiKey = this.#getString(this.#getFromEnv("SENDGRID_API_KEY"));
+  static genericEmailSender = this.#getString(
+    this.#getFromEnv("GENERIC_EMAIL_SENDER")
+  );
   
   static #getFromEnv(key) {
     const value = process.env[key];

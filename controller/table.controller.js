@@ -28,6 +28,7 @@ class TableController {
     try {
       const { table_number, capacity } = req.body;
       const newTable = await Table.create({ table_number, capacity });
+      await newTable.save();
       return ExpressResponse.success(res, { data: newTable });
     } catch (error) {
       next(error);

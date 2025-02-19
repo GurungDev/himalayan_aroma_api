@@ -3,7 +3,7 @@ import { Types } from "mongoose";
 
 const orderItemSchema = new Schema({
   orderID: {
-    type: Types.ObjectId,
+    type: Schema.Types.ObjectId,
     ref: "Order",
     required: true,
   },
@@ -13,7 +13,7 @@ const orderItemSchema = new Schema({
     min: 1,
   },
   menuID: {
-    type: Types.ObjectId,
+    type: Schema.Types.ObjectId,
     ref: "Menu",
     required: true,
   },

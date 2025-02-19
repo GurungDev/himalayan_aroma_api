@@ -59,7 +59,7 @@ class TableController {
       if (!table) {
         throw new ExpressError(404, "Table not found");
       }
-      table.isReserved = !table.isReserved;
+      table.isReserved = false
       const updatedTable = await table.save();
       return ExpressResponse.success(res, { data: updatedTable });
     } catch (error) {

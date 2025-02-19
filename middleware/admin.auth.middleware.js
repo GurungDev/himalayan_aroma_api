@@ -21,7 +21,7 @@ export async function authorization(req, res, next) {
     } else if (role === userRole.STAFF) {
       const isUser = await Staff.findOne({ email });
       if (!isUser) throw new ExpressError(400, "User not found");
-      req.user = { id, email, role };
+      req.user = { id, email, role, staffJob: isUser.role };
       next();
     } else {
       throw new ExpressError(400, "Invalid role");

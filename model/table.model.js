@@ -16,6 +16,11 @@ const tableSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    status: {
+      type: String,
+      enum: [ "ACTIVE", "INACTIVE"],
+      default: "ACTIVE",
+    }
   },
   {
     timestamps: true,

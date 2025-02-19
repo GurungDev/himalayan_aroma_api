@@ -20,6 +20,7 @@ export const orderStatus = {
     COMPLETE: "complete",
     SERVED: "served",
     PAID: "paid",
+    CANCELED: "canceled" 
   };
 
   export const paymentMethod = {

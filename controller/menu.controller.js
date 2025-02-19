@@ -5,9 +5,6 @@ import Menu from "../model/menu.model.js";
 
 class MenuController {
 
-
-
- 
   async getAll(req, res, next) {
     try {
       const { page = 1, limit = 20 } = req.query;
@@ -66,7 +63,7 @@ class MenuController {
   async update(req, res, next) {
     try {
       const { id } = req.params;
-      const { name, price, description, isSpecial } = req.body;
+      const { name, price, description, isSpecial, isAvailable   } = req.body;
       let menu = await Menu.findById(id);
       if (!menu) {
         throw new ExpressError(404, "Menu item not found");
@@ -75,6 +72,7 @@ class MenuController {
       menu.price = price || menu.price;
       menu.description = description || menu.description;
       menu.isSpecial = isSpecial || menu.isSpecial;
+      menu.isAvailable = isAvailable || menu.isAvailable;
       const updatedMenu = await menu.save();
       return ExpressResponse.success(res, { data: updatedMenu });
     } catch (error) {

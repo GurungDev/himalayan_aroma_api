@@ -1,5 +1,5 @@
 import ExpressError from "../common/error.js";
-import { orderStatus, staffRole, userRole } from "../common/object.js";
+import { orderStatus, staffRole } from "../common/object.js";
 import paginationInfo from "../common/paginationInfo.js";
 import { ExpressResponse } from "../common/success.handler.js";
 import Order from "../model/order.model.js";
@@ -10,17 +10,17 @@ class OrderController {
     try {
       const { page = 1, limit = 20 } = req.query;
       const skip = (page - 1) * limit;
-      const { table, staff, status } = req.body;
+      const { table, staff, status } = req.query;
       const query = {};
       if (table) query.table = table;
       if (staff) query.staff = staff;
-      if (status) query.status = status;
+      if (!orderStatus[status]) query.status = status;
 
       const [responseOrder, countOrder] = await Order.find(query)
         .limit(limit)
         .skip(skip)
-        .lean()
-        .exec();
+        .lean();
+
       return ExpressResponse.success(res, {
         data: responseOrder,
         pagination: paginationInfo(countOrder, limit, page),
@@ -32,7 +32,7 @@ class OrderController {
 
   async getById(req, res, next) {
     try {
-      const { id } = req.params;    
+      const { id } = req.params;
       const order = await Order.findById(id)
         .populate("orderItemsList table staff")
         .lean();
@@ -83,28 +83,20 @@ class OrderController {
       }
 
       if (
-        [orderStatus.SERVED, orderStatus.CANCELED].includes(status) &&
-        staffJob !== staffRole.WAITER
+        [orderStatus.SERVED, orderStatus.CANCELED, orderStatus.PAID].includes(
+          status
+        ) &&
+        staffJob !== staffRole.STAFF
       ) {
         throw new ExpressError(
           400,
-          "Only waiter are authorized to update this status"
-        );
-      }
-
-      if (
-        [orderStatus.PAID].includes(status) &&
-        staffJob !== staffRole.CASHIER
-      ) {
-        throw new ExpressError(
-          400,
-          "Only Cashier are authorized to update this status"
+          "Only Staff are authorized to update this status"
         );
       }
 
       order.status = status;
       const updatedOrder = await order.save();
-      if (order.status == orderStatus.PAID && staffJob == staffRole.CASHIER) {
+      if (order.status == orderStatus.PAID || order.status == orderStatus.CANCELED) {
         const table = await Table.updateOne(
           { _id: order.table._id },
           { isReserved: false }

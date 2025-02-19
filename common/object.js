@@ -1,7 +1,6 @@
 export const staffRole = {
     CHEF: "chef",
-    WAITER: "waiter",
-    CASHIER: "Cashier"
+    STAFF: "staff"
 }
 
 export const userRole = {

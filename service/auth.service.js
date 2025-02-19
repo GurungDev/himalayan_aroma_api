@@ -128,6 +128,25 @@ class UserService {
       next(error);
     }
   }
+
+  async forgotPassword(req, res, next) {
+    try {
+      const { email, otp, password } = req.body;
+      if (!email || !otp || !password) {
+        throw new ExpressError(400, "All fields are required");
+      }
+      await otpService.verifyOtp({ email, otp, purpose: OtpPurpose.FORGOT_PASSWORD });
+      const staff = await Staff.findOne({ email });
+      if (!staff) {
+        throw new ExpressError(400, "Staff not found");
+      }
+      staff.password = hashString(password);
+      await staff.save();
+      return ExpressResponse.success(res, { message: "Password reset successfully" });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 const userService = new UserService();

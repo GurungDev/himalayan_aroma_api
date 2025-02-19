@@ -1,11 +1,11 @@
 import ExpressError from "../common/error.js";
 import { userRole } from "../common/object.js";
-import paginationInfo from "../common/paginationInf.js";
+import paginationInfo from "../common/paginationInfo.js";
 import { ExpressResponse } from "../common/success.handler.js";
 import Staff from "../model/staff.model.js";
 import { hashString } from "../utils/hash.js";
 
-class staffController {
+class StaffController {
   async getAll(req, res, next) {
     try {
       const { role, status, name } = req.query;
@@ -54,7 +54,7 @@ class staffController {
     try {
       const { id } = req.params;
       let hashedPassword;
-       let staff = await Staff.findById(id).lean();
+      let staff = await Staff.findById(id).lean();
 
       if (!staff) {
         throw new ExpressError(404, "Staff not found");
@@ -79,8 +79,11 @@ class staffController {
         staff.role = req.body.role;
       }
       if (req.body.status) {
-        if(req.user.role != userRole.ADMIN){
-            throw new ExpressError(400, "You are not permitted to perform this action");
+        if (req.user.role != userRole.ADMIN) {
+          throw new ExpressError(
+            400,
+            "You are not permitted to perform this action"
+          );
         }
         if (typeof req.body.status !== Boolean) {
           throw new ExpressError(400, "Invalid status");
@@ -103,9 +106,7 @@ class staffController {
       next(error);
     }
   }
-
- 
 }
 
-const staffController = new staffController();
+const staffController = new StaffController();
 export default staffController;

@@ -8,7 +8,7 @@ class MenuController {
   async getAll(req, res, next) {
     try {
       const { page = 1, limit = 20 } = req.query;
-      const { name, isSpecial, isAvailable } = req.body;
+      const { name, isSpecial, isAvailable } = req.query;
       const skip = (page - 1) * limit;
       const query = {};
       if (name) query.name = name;

@@ -26,8 +26,11 @@ class TableController {
 
   async create(req, res, next) {
     try {
-      const { table_number, capacity } = req.body;
-      const newTable = await Table.create({ table_number, capacity });
+      const { table_number, capacity, status } = req.body;
+      if(await Table.findOne({table_number})){
+        throw new ExpressError(400, "Table already exists");
+      }
+      const newTable = await Table.create({ table_number, capacity , status});
       await newTable.save();
       return ExpressResponse.success(res, { data: newTable });
     } catch (error) {

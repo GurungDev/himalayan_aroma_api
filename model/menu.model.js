@@ -11,7 +11,7 @@ const menuSchema = new Schema({
   },
   isAvailable: {
     type: Boolean,
-    default: false,
+    default: true,
   },
   price: {
     type: Number,

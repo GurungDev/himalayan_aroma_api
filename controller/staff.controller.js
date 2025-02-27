@@ -18,7 +18,7 @@ class StaffController {
 
       const [responseStaff, countStaff] = await Promise.all([
         Staff.find(query).limit(limit).skip(skip).sort("-updatedAt").lean(),
-        Staff.count(query),
+        Staff.countDocuments(query),
       ]);
 
       return ExpressResponse.success(res, {
@@ -78,7 +78,7 @@ class StaffController {
         }
         staff.role = req.body.role;
       }
-      if (req.body.status) {
+      if (req.body.status != undefined) {
         if (req.user.role != userRole.ADMIN) {
           throw new ExpressError(
             400,

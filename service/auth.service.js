@@ -69,7 +69,7 @@ class UserService {
 
   async staffRegister(req, res, next) {
     try {
-      const { email, password, role, otp } = req.body;
+      const { firstName, lastName, email, password, role, otp } = req.body;
       if (!email || !password || !role || !otp) {
         throw new ExpressError(400, "All fields are required");
       }
@@ -83,6 +83,8 @@ class UserService {
           email,
         });
         const newStaff = new Staff({
+          firstName,
+          lastName,
           email,
           password: hashString(password),
           role,

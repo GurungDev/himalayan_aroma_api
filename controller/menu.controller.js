@@ -4,20 +4,23 @@ import { ExpressResponse } from "../common/success.handler.js";
 import Menu from "../model/menu.model.js";
 
 class MenuController {
-
   async getAll(req, res, next) {
     try {
-      const { page = 1, limit = 20 } = req.query;
-      const { name, isSpecial, isAvailable } = req.query;
+      const { page = 1, limit = 20, name, isSpecial, isAvailable } = req.query;
       const skip = (page - 1) * limit;
       const query = {};
-      if (name) query.name = name;
+  
+      if (name) {
+        query.name = { $regex: name, $options: "i" }; // Case-insensitive partial match
+      }
       if (isSpecial) query.isSpecial = isSpecial;
       if (isAvailable) query.isAvailable = isAvailable;
+  
       const [responseMenu, countMenu] = await Promise.all([
         Menu.find(query).limit(limit).skip(skip).lean(),
-        Menu.countDocuments(),
+        Menu.countDocuments(query), // Apply query to count total documents
       ]);
+  
       return ExpressResponse.success(res, {
         data: responseMenu,
         pagination: paginationInfo(countMenu, limit, page),
@@ -26,6 +29,7 @@ class MenuController {
       next(error);
     }
   }
+  
 
   async getById(req, res, next) {
     try {
@@ -63,7 +67,7 @@ class MenuController {
   async update(req, res, next) {
     try {
       const { id } = req.params;
-      const { name, price, description, isSpecial, isAvailable   } = req.body;
+      const { name, price, description, isSpecial, isAvailable } = req.body;
       let menu = await Menu.findById(id);
       if (!menu) {
         throw new ExpressError(404, "Menu item not found");
@@ -71,8 +75,8 @@ class MenuController {
       menu.name = name || menu.name;
       menu.price = price || menu.price;
       menu.description = description || menu.description;
-      menu.isSpecial = isSpecial || menu.isSpecial;
-      menu.isAvailable = isAvailable || menu.isAvailable;
+      menu.isSpecial = isSpecial !== null ? isSpecial : menu.isSpecial;
+      menu.isAvailable = isAvailable !== null ? isAvailable : menu.isAvailable;
       const updatedMenu = await menu.save();
       return ExpressResponse.success(res, { data: updatedMenu });
     } catch (error) {

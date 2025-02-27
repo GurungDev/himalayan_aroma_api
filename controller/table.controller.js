@@ -41,13 +41,17 @@ class TableController {
   async update(req, res, next) {
     try {
       const { id } = req.params;
-      const { table_number, capacity } = req.body;
+      const { table_number, capacity, status } = req.body;
       let table = await Table.findById(id) ;
       if (!table) {
         throw new ExpressError(404, "Table not found");
       }
       table.table_number = table_number || table.table_number;
       table.capacity = capacity || table.capacity;
+      if(table.isReserved && status === "INACTIVE"){
+        throw new ExpressError(400, "Status Cannot be changed because the table is reserved.");
+      }
+      table.status = status || table.status
       const updatedTable = await table.save();
       return ExpressResponse.success(res, { data: updatedTable });
     } catch (error) {

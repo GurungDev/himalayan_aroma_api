@@ -22,5 +22,5 @@ allRoutes.use("/menu", adminMenuRouter);
 allRoutes.use("/table", adminTableRouter);
 allRoutes.use("/order", adminOrderRouter);
 allRoutes.use("/payment", amdinPaymentRouter);
-
+allRoutes.get("/dashboard", allowAdminOnly, adminController.getDashboardInfo);
 export default allRoutes;

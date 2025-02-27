@@ -32,6 +32,7 @@ const staffSchema = new Schema(
       required: true,
       lowercase: true,
     },
+
     password: {
       type: String,
       minLength: 5,

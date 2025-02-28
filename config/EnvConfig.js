@@ -16,6 +16,9 @@ export default class EnvConfig {
   static genericEmailSender = this.#getString(
     this.#getFromEnv("GENERIC_EMAIL_SENDER")
   );
+
+  static khaltiSecretKey = this.#getString(this.#getFromEnv("KHALTI_SECRET_KEY"));
+  static khaltiUrl = this.#getString(this.#getFromEnv("KHALTI_URL"));
   
   static #getFromEnv(key) {
     const value = process.env[key];

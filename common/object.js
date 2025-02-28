@@ -24,7 +24,7 @@ export const orderStatus = {
 
   export const paymentMethod = {
     CASH: "cash",
-    ESEWA: "esewa",
+    KHALTI: "khalti",
   };
   
   export const paymentStatus = {

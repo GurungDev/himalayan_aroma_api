@@ -1,4 +1,4 @@
-import ExpressError from "../common/error.js";
+ import ExpressError from "../common/error.js";
 import { orderStatus, staffRole } from "../common/object.js";
 import paginationInfo from "../common/paginationInfo.js";
 import { ExpressResponse } from "../common/success.handler.js";
@@ -14,12 +14,23 @@ class OrderController {
       const query = {};
       if (table) query.table = table;
       if (staff) query.staff = staff;
-      if (!orderStatus[status]) query.status = status;
+      if (orderStatus[status]) query.status = status;
 
-      const [responseOrder, countOrder] = await Order.find(query)
-        .limit(limit)
-        .skip(skip)
-        .lean();
+      const [responseOrder, countOrder] = await Promise.all([
+        Order.find(query)
+          .limit(limit)
+          .skip(skip)
+          .populate({
+            path: "table",
+            select: "table_number",
+          })
+          .populate({
+            path: "staff",
+            select: "firstName lastName",
+          })
+          .lean(),
+        Order.countDocuments(query),
+      ]);
 
       return ExpressResponse.success(res, {
         data: responseOrder,
@@ -96,7 +107,10 @@ class OrderController {
 
       order.status = status;
       const updatedOrder = await order.save();
-      if (order.status == orderStatus.PAID || order.status == orderStatus.CANCELED) {
+      if (
+        order.status == orderStatus.PAID ||
+        order.status == orderStatus.CANCELED
+      ) {
         const table = await Table.updateOne(
           { _id: order.table._id },
           { isReserved: false }

@@ -1,6 +1,6 @@
 import { Schema, model } from "mongoose";
 import { Types } from "mongoose";
-import { paymentMethod, paymentStatus } from "../common/object";
+import { paymentMethod, paymentStatus } from "../common/object.js";
 
 const paymentSchema = new Schema({
   amount: {
@@ -22,6 +22,11 @@ const paymentSchema = new Schema({
     enum: Object.values(paymentStatus),
     required: true,
     default: paymentStatus.PENDING,
+  },
+
+  khaltiPaymentId: {
+    type: String,
+    required: false,
   },
 },
 {

@@ -1,5 +1,4 @@
 import { Schema, model } from "mongoose";
-import { Types } from "mongoose";
 
 const orderItemSchema = new Schema({
   orderID: {

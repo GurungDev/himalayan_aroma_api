@@ -11,8 +11,8 @@ export default function himalayanAroma() {
   app.use(cors());
   app.use(morgan("dev"));
 
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
+  app.use(express.urlencoded({ extended: true })); // To parse FormData
+  app.use(express.json()); // To parse JSON data
   app.use("/api",allRoutes);
 
   app.use("*", (req, res, next) => {

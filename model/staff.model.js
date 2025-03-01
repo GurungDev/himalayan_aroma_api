@@ -15,6 +15,10 @@ const staffSchema = new Schema(
       minLength: 2,
       required: false,
     },
+    image: {
+      type: String,
+      required: false,
+    },
     role: {
       type: String,
       enum: Object.values(staffRole),

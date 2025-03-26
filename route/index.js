@@ -15,7 +15,7 @@ const allRoutes = Router({ mergeParams: true });
 
 allRoutes.post("/login", userService.login);
 allRoutes.post("/send-otp", userService.sendOtp);
-allRoutes.post("/staff-register", uploadImage(), userService.staffRegister);
+allRoutes.post("/staff-register", uploadImage(false), userService.staffRegister);
 allRoutes.patch("/staff-change-password", userService.forgotPassword);
 allRoutes.get("/khalti/verify", paymentController.khaltiVerify);
 allRoutes.use(authorization);

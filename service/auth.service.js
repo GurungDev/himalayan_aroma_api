@@ -37,7 +37,6 @@ class UserService {
         case userRole.STAFF:
           const staff = await Staff.findOne({ email }).select("+password");
           if (staff) {
-            
             if (staff.status === false) {
               throw new ExpressError(400, "Staff is inactive.");
             } else if (staff.password === hashString(password)) {
@@ -49,7 +48,12 @@ class UserService {
               });
               return ExpressResponse.success(res, {
                 message: "Login successfully",
-                data: { token },
+                data: {
+                  token,
+                  email: staff.email,
+                  role: staff.role,
+                  name: staff.firstName + " " + staff.lastName,
+                },
                 statusCode: 200,
               });
             } else {
@@ -69,7 +73,8 @@ class UserService {
 
   async staffRegister(req, res, next) {
     try {
-      const { firstName, lastName, email, password, role, image, otp } = req.body;
+      const { firstName, lastName, email, password, role, image, otp } =
+        req.body;
       if (!email || !password || !role || !otp) {
         throw new ExpressError(400, "All fields are required");
       }
@@ -122,11 +127,11 @@ class UserService {
         message: "OTP sent successfully",
         data: otp?.otp,
       });
-     if(purpose === OtpPurpose.REGISTER){
-       await emailSender.verifyUserEmail(email, otp?.otp);
-     }else if(purpose === OtpPurpose.FORGOT_PASSWORD){
-       await emailSender.forgotPassword(email, otp?.otp);
-     }
+      if (purpose === OtpPurpose.REGISTER) {
+        await emailSender.verifyUserEmail(email, otp?.otp);
+      } else if (purpose === OtpPurpose.FORGOT_PASSWORD) {
+        await emailSender.forgotPassword(email, otp?.otp);
+      }
     } catch (error) {
       next(error);
     }
@@ -138,14 +143,20 @@ class UserService {
       if (!email || !otp || !password) {
         throw new ExpressError(400, "All fields are required");
       }
-      await otpService.verifyOtp({ email, otp, purpose: OtpPurpose.FORGOT_PASSWORD });
+      await otpService.verifyOtp({
+        email,
+        otp,
+        purpose: OtpPurpose.FORGOT_PASSWORD,
+      });
       const staff = await Staff.findOne({ email });
       if (!staff) {
         throw new ExpressError(400, "Staff not found");
       }
       staff.password = hashString(password);
       await staff.save();
-      return ExpressResponse.success(res, { message: "Password reset successfully" });
+      return ExpressResponse.success(res, {
+        message: "Password reset successfully",
+      });
     } catch (error) {
       next(error);
     }

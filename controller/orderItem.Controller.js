@@ -103,7 +103,7 @@ class OrderItemsController {
   async updateOrderItem(req, res, next) {
     try {
       const orderItem = await OrderItem.findById(req.params.id).populate(
-        "menu"
+        "menuID"
       );
       if (!orderItem) {
         throw new ExpressError(404, "Order item not found");

@@ -1,4 +1,5 @@
- import ExpressError from "../common/error.js";
+import { Promise } from "mongoose";
+import ExpressError from "../common/error.js";
 import { orderStatus, staffRole } from "../common/object.js";
 import paginationInfo from "../common/paginationInfo.js";
 import { ExpressResponse } from "../common/success.handler.js";
@@ -28,7 +29,19 @@ class OrderController {
             path: "staff",
             select: "firstName lastName",
           })
-          .lean(),
+          .populate({
+            path: "orderItemsList",
+          })
+          .lean()
+          .then((orders) =>
+            orders.map((order) => ({
+              ...order,
+              totalAmount: order.orderItemsList.reduce(
+                (acc, item) => acc + item.price * item.quantity,
+                0
+              ),
+            }))
+          ),
         Order.countDocuments(query),
       ]);
 
@@ -45,7 +58,14 @@ class OrderController {
     try {
       const { id } = req.params;
       const order = await Order.findById(id)
-        .populate("orderItemsList table staff")
+        .populate("table staff")
+        .populate({
+          path: "orderItemsList",
+          populate: {
+            path: "menuID",
+            select: "name image isSpecial description",
+          },
+        })
         .lean();
       return ExpressResponse.success(res, { data: order });
     } catch (error) {

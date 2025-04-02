@@ -37,7 +37,7 @@ class PaymentController {
         paymentMethod: paymentMethod.CASH,
         paymentStatus: paymentStatus.SUCCESS,
       }).save();
-      return ExpressResponse.success({ data: payment });
+      ExpressResponse.success(res, { data: payment });
     } catch (error) {
       next(error);
     }
@@ -185,16 +185,16 @@ class PaymentController {
       });
 
       if (!response) {
-        return ExpressResponse.success({
+        return ExpressResponse.success(res, {
           message: "Payment not found",
         });
       }
       if (response.paymentStatus !== paymentStatus.PENDING) {
-        return ExpressResponse.success({
+        return ExpressResponse.success(res, {
           message: "Payment pending",
         });
       } else if (response.paymentStatus !== paymentStatus.SUCCESS) {
-        return ExpressResponse.success({
+        return ExpressResponse.success(res, {
           message: "Payment Success",
         });
       } else if (response.paymentStatus !== paymentStatus.FAILED) {

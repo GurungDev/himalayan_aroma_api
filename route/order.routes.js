@@ -7,6 +7,8 @@ const adminOrderRouter = Router({ mergeParams: true });
 adminOrderRouter.use("/items", adminOrderItemsRouter);
 adminOrderRouter.get("/", orderController.getAllOrder);
 adminOrderRouter.post("/", orderController.create);
+adminOrderRouter.post("/", orderController.create);
+
 adminOrderRouter.get("/:id", orderController.getById);
 adminOrderRouter.patch("/:id", orderController.updateStatus);
 

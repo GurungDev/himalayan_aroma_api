@@ -3,7 +3,7 @@ import EnvConfig from "../config/EnvConfig.js";
 import Order from "../model/order.model.js";
 import ExpressError from "../common/error.js";
 import OrderItem from "../model/orderItem.model.js";
-import { paymentMethod, paymentStatus, staffRole } from "../common/object.js";
+import { orderStatus, paymentMethod, paymentStatus, staffRole } from "../common/object.js";
 import Payment from "../model/payment.model.js";
 import { ExpressResponse } from "../common/success.handler.js";
 import paginationInfo from "../common/paginationInfo.js";
@@ -11,13 +11,17 @@ import paginationInfo from "../common/paginationInfo.js";
 class PaymentController {
   constructor() {
     this.initKhaltiPayemnt = this.initKhaltiPayemnt.bind(this);
+    this.khaltiInit = this.khaltiInit.bind(this);
+    this.khaltiVerify = this.khaltiVerify.bind(this);
+    this.cashInPayment = this.cashInPayment.bind(this);
+    this.checkKhaltiMobile = this.checkKhaltiMobile.bind(this);
     this.verifyKhaltiPayment = this.verifyKhaltiPayment.bind(this);
   }
 
   async cashInPayment(req, res, next) {
     try {
       const { orderID } = req.body;
-      const order = await Order.find({ _id: orderID });
+      let order = await Order.findOne({ _id: orderID });
       const { id, role } = req.user;
       if (role !== staffRole.STAFF) {
         throw new ExpressError(400, "Only staff can take payment.");
@@ -37,6 +41,8 @@ class PaymentController {
         paymentMethod: paymentMethod.CASH,
         paymentStatus: paymentStatus.SUCCESS,
       }).save();
+      order.status = orderStatus.PAID;
+      await order.save();
       ExpressResponse.success(res, { data: payment });
     } catch (error) {
       next(error);

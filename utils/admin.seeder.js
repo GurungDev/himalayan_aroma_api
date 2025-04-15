@@ -1,4 +1,4 @@
-import EnvConfig from "../config/EnvConfig.js";
+  import EnvConfig from "../config/EnvConfig.js";
 import Admin from "../model/admin.model.js";
  
 

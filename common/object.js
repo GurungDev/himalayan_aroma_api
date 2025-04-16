@@ -17,7 +17,6 @@ export const orderStatus = {
     PENDING: "pending",
     IN_PROGRESS: "in_progress",
     COMPLETE: "complete",
-    SERVED: "served",
     PAID: "paid",
     CANCELED: "canceled" 
   };

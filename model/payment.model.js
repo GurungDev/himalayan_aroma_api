@@ -19,9 +19,9 @@ const paymentSchema = new Schema({
   },
   paymentStatus: {
     type: String,
+    default: paymentStatus.PENDING,
     enum: Object.values(paymentStatus),
     required: true,
-    default: paymentStatus.PENDING,
   },
 
   khaltiPaymentId: {

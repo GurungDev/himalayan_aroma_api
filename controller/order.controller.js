@@ -113,9 +113,7 @@ class OrderController {
       }
 
       if (
-        [orderStatus.SERVED, orderStatus.CANCELED, orderStatus.PAID].includes(
-          status
-        ) &&
+        [orderStatus.CANCELED, orderStatus.PAID].includes(status) &&
         staffJob !== staffRole.STAFF
       ) {
         throw new ExpressError(
@@ -130,11 +128,7 @@ class OrderController {
         order.status == orderStatus.PAID ||
         order.status == orderStatus.CANCELED
       ) {
-        const table = await Table.updateOne(
-          { _id: order.table._id },
-          { isReserved: false }
-        );
-        await table.save();
+        await Table.updateOne({ _id: order.table._id }, { isReserved: false });
       }
       return ExpressResponse.success(res, { data: updatedOrder });
     } catch (error) {

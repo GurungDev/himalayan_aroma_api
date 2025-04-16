@@ -36,7 +36,6 @@ class PaymentController {
       );
       const payment = await new Payment({
         orderId: orderID,
-        staffID: id,
         amount: totalAmount,
         paymentMethod: paymentMethod.CASH,
         paymentStatus: paymentStatus.SUCCESS,
@@ -51,7 +50,6 @@ class PaymentController {
 
   async initKhaltiPayemnt(
     amount,
-    purchase_order_id,
     purchase_order_name,
     transaction_uuid,
     orderID
@@ -60,8 +58,8 @@ class PaymentController {
       const data = {
         return_url: `http://localhost:8000/api/khalti/verify?transaction_uuid=${transaction_uuid}&orderID=${orderID}`,
         website_url: "http://localhost:3000",
-        amount,
-        purchase_order_id,
+        amount: amount * 100,
+        purchase_order_id: transaction_uuid,
         purchase_order_name,
       };
       const config = {
@@ -70,6 +68,7 @@ class PaymentController {
           "Content-Type": "application/json",
         },
       };
+      
       const response = await axios.post(EnvConfig.khaltiUrl, data, config);
       return { success: true, Data: response.data };
     } catch (error) {
@@ -126,9 +125,9 @@ class PaymentController {
         0
       );
 
+      console.log(totalAmount)
       const response = await this.initKhaltiPayemnt(
-        totalAmount.toString(),
-        transaction_uuid,
+        totalAmount,
         "test",
         transaction_uuid,
         orderID

@@ -3,10 +3,17 @@ import EnvConfig from "../config/EnvConfig.js";
 import Order from "../model/order.model.js";
 import ExpressError from "../common/error.js";
 import OrderItem from "../model/orderItem.model.js";
-import { orderStatus, paymentMethod, paymentStatus, staffRole } from "../common/object.js";
+import {
+  orderStatus,
+  paymentMethod,
+  paymentStatus,
+  staffRole,
+} from "../common/object.js";
 import Payment from "../model/payment.model.js";
 import { ExpressResponse } from "../common/success.handler.js";
 import paginationInfo from "../common/paginationInfo.js";
+import Table from "../model/table.model.js";
+import mongoose from "mongoose";
 
 class PaymentController {
   constructor() {
@@ -19,34 +26,55 @@ class PaymentController {
   }
 
   async cashInPayment(req, res, next) {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+  
     try {
       const { orderID } = req.body;
-      let order = await Order.findOne({ _id: orderID });
       const { id, role } = req.user;
+  
       if (role !== staffRole.STAFF) {
         throw new ExpressError(400, "Only staff can take payment.");
       }
+  
+      const order = await Order.findById(orderID).session(session);
       if (!order) {
-        throw new ExpressError(404, "order not found.");
+        throw new ExpressError(404, "Order not found.");
       }
-      const orderItems = await OrderItem.find({ orderID });
+  
+      const orderItems = await OrderItem.find({ orderID }).session(session);
       const totalAmount = orderItems.reduce(
         (total, item) => total + item.price * item.quantity,
         0
       );
+  
       const payment = await new Payment({
         orderId: orderID,
         amount: totalAmount,
         paymentMethod: paymentMethod.CASH,
-        paymentStatus: paymentStatus.SUCCESS,
-      }).save();
+        paymentStatus: paymentStatus.PAID,
+      }).save({ session });
+  
       order.status = orderStatus.PAID;
-      await order.save();
-      ExpressResponse.success(res, { data: payment });
+      await order.save({ session });
+  
+      await Table.updateOne(
+        { _id: order.table },
+        { $set: { isReserved: false } },
+        { session }
+      );
+  
+      await session.commitTransaction();
+      session.endSession();
+  
+      return ExpressResponse.success(res, { data: payment });
     } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
       next(error);
     }
   }
+  
 
   async initKhaltiPayemnt(
     amount,
@@ -68,7 +96,7 @@ class PaymentController {
           "Content-Type": "application/json",
         },
       };
-      
+
       const response = await axios.post(EnvConfig.khaltiUrl, data, config);
       return { success: true, Data: response.data };
     } catch (error) {
@@ -125,7 +153,7 @@ class PaymentController {
         0
       );
 
-      console.log(totalAmount)
+      console.log(totalAmount);
       const response = await this.initKhaltiPayemnt(
         totalAmount,
         "test",
@@ -172,7 +200,7 @@ class PaymentController {
       if (!payment) {
         throw new ExpressError(400, "Payment not found.");
       }
-      payment.paymentStatus = paymentStatus.SUCCESS;
+      payment.paymentStatus = paymentStatus.PAID;
       await payment.save();
       return ExpressResponse.success(res, {
         message: "Payment Successful",
@@ -198,7 +226,7 @@ class PaymentController {
         return ExpressResponse.success(res, {
           message: "Payment pending",
         });
-      } else if (response.paymentStatus !== paymentStatus.SUCCESS) {
+      } else if (response.paymentStatus !== paymentStatus.PAID) {
         return ExpressResponse.success(res, {
           message: "Payment Success",
         });

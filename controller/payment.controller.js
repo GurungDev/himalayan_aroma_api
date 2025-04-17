@@ -83,8 +83,8 @@ class PaymentController {
   ) {
     try {
       let data = {
-        return_url: `http://localhost:8000/api/khalti-verify?transaction_uuid=${transaction_uuid}&orderID=${orderID}`,
-        website_url: "http://localhost:5173/succcess",
+        return_url: `http://${EnvConfig.ip_address}:${EnvConfig.port}/api/khalti-verify?transaction_uuid=${transaction_uuid}&orderID=${orderID}`,
+        website_url: `http://${EnvConfig.ip_address}:5173/`,
         amount: amount,
         purchase_order_id: transaction_uuid,
         purchase_order_name,
@@ -138,7 +138,7 @@ class PaymentController {
       if (!transaction_uuid || !orderID) {
         throw new ExpressError(400, "Missing required fields.");
       }
-      const order = await Order.find({ _id: orderID });
+      const order = await Order.findOne({ _id: orderID });
       const { id, role } = req.user;
       if (role !== staffRole.STAFF) {
         throw new ExpressError(400, "Only staff can take payment.");
@@ -146,6 +146,15 @@ class PaymentController {
       if (!order) {
         throw new ExpressError(404, "order not found.");
       }
+
+      if(order.status == orderStatus.PENDING) {
+        throw new ExpressError(400, "Payment already initiated.");
+      }
+
+      if(order.status == orderStatus.PAID) {
+        throw new ExpressError(400, "Order already paid.");
+      }
+
       const orderItems = await OrderItem.find({ orderID });
       const totalAmount = orderItems.reduce(
         (total, item) => total + item.price * item.quantity,

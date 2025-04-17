@@ -5,7 +5,7 @@ config();
 
 export default class EnvConfig {
   static port = this.#getNumber(this.#getFromEnv("PORT"));
- 
+  static ip_address= this.#getFromEnv("IP_ADDRESS");
   static dbUri = this.#getString(this.#getFromEnv("DB_URL"));
  
   static jwtSecret = this.#getString(this.#getFromEnv("JWT_SECRET"));

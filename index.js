@@ -6,7 +6,7 @@ import { adminSeed } from "./utils/admin.seeder.js";
 dbConnection();
 const app = himalayanAroma();
 
-app.listen(EnvConfig.port, async () => {
+app.listen(EnvConfig.port,'0.0.0.0', async () => {
   console.log(`App is running @Port: ${EnvConfig.port}`);
   adminSeed();
 });

@@ -17,7 +17,7 @@ allRoutes.post("/login", userService.login);
 allRoutes.post("/send-otp", userService.sendOtp);
 allRoutes.post("/staff-register", uploadImage(false), userService.staffRegister);
 allRoutes.patch("/staff-change-password", userService.forgotPassword);
-allRoutes.get("/khalti/verify", paymentController.khaltiVerify);
+allRoutes.get("/khalti-verify", paymentController.khaltiVerify);
 allRoutes.use(authorization);
 allRoutes.get("/staff", allowAdminOnly, staffController.getAll);
 allRoutes.patch("/staff/:id", allowAdminOnly, adminController.activateStaff);

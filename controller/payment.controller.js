@@ -28,45 +28,45 @@ class PaymentController {
   async cashInPayment(req, res, next) {
     const session = await mongoose.startSession();
     session.startTransaction();
-  
+
     try {
       const { orderID } = req.body;
       const { id, role } = req.user;
-  
+
       if (role !== staffRole.STAFF) {
         throw new ExpressError(400, "Only staff can take payment.");
       }
-  
+
       const order = await Order.findById(orderID).session(session);
       if (!order) {
         throw new ExpressError(404, "Order not found.");
       }
-  
+
       const orderItems = await OrderItem.find({ orderID }).session(session);
       const totalAmount = orderItems.reduce(
         (total, item) => total + item.price * item.quantity,
         0
       );
-  
+
       const payment = await new Payment({
         orderId: orderID,
         amount: totalAmount,
         paymentMethod: paymentMethod.CASH,
         paymentStatus: paymentStatus.PAID,
       }).save({ session });
-  
+
       order.status = orderStatus.PAID;
       await order.save({ session });
-  
+
       await Table.updateOne(
         { _id: order.table },
         { $set: { isReserved: false } },
         { session }
       );
-  
+
       await session.commitTransaction();
       session.endSession();
-  
+
       return ExpressResponse.success(res, { data: payment });
     } catch (error) {
       await session.abortTransaction();
@@ -74,7 +74,6 @@ class PaymentController {
       next(error);
     }
   }
-  
 
   async initKhaltiPayemnt(
     amount,
@@ -83,14 +82,14 @@ class PaymentController {
     orderID
   ) {
     try {
-      const data = {
-        return_url: `http://localhost:8000/api/khalti/verify?transaction_uuid=${transaction_uuid}&orderID=${orderID}`,
-        website_url: "http://localhost:3000",
-        amount: amount * 100,
+      let data = {
+        return_url: `http://localhost:8000/api/khalti-verify?transaction_uuid=${transaction_uuid}&orderID=${orderID}`,
+        website_url: "http://localhost:5173/succcess",
+        amount: amount,
         purchase_order_id: transaction_uuid,
         purchase_order_name,
       };
-      const config = {
+      let config = {
         headers: {
           Authorization: `key ${EnvConfig.khaltiSecretKey}`,
           "Content-Type": "application/json",
@@ -116,7 +115,7 @@ class PaymentController {
       const config = {
         headers: { Authorization: `key ${EnvConfig.khaltiSecretKey}` },
       };
-
+      console.log("yeha xu ");
       const response = await axios.post(
         "https://dev.khalti.com/api/v2/epayment/lookup/",
         data,
@@ -153,22 +152,22 @@ class PaymentController {
         0
       );
 
-      console.log(totalAmount);
       const response = await this.initKhaltiPayemnt(
         totalAmount,
         "test",
         transaction_uuid,
         orderID
       );
+
       if (!response.success) {
         throw new ExpressError(400, response?.Message);
       }
       await new Payment({
         orderId: orderID,
-        staffID: id,
+        amount: totalAmount,
         paymentMethod: paymentMethod.KHALTI,
         paymentStatus: paymentStatus.PENDING,
-        transaction_uuid: transaction_uuid,
+        khaltiPaymentId: transaction_uuid,
       }).save();
       return ExpressResponse.success(res, {
         message: "Khalti Initiated",
@@ -180,14 +179,17 @@ class PaymentController {
   }
 
   async khaltiVerify(req, res, next) {
+    const session = await mongoose.startSession();
+    session.startTransaction();
     try {
-      const { transaction_uuid, orderID } = req.query;
-      const order = await Order.find({ _id: orderID });
+      const { transaction_uuid, orderID, pidx } = req.query;
+
+      const order = await Order.findById(orderID);
       if (!order) {
         throw new ExpressError(404, "order not found.");
       }
       const response = await this.verifyKhaltiPayment({
-        pidx: transaction_uuid,
+        pidx: pidx,
       });
       if (!response.success) {
         throw new ExpressError(400, response?.Message);
@@ -196,16 +198,31 @@ class PaymentController {
       const payment = await Payment.findOne({
         orderId: orderID,
         khaltiPaymentId: transaction_uuid,
-      });
+      }).session(session);
+
       if (!payment) {
         throw new ExpressError(400, "Payment not found.");
       }
       payment.paymentStatus = paymentStatus.PAID;
-      await payment.save();
+      await payment.save({ session });
+      order.status = orderStatus.PAID;
+      await order.save({ session });
+
+      await Table.updateOne(
+        { _id: order.table },
+        { $set: { isReserved: false } },
+        { session }
+      );
+
+      await session.commitTransaction();
+      session.endSession();
+
       return ExpressResponse.success(res, {
         message: "Payment Successful",
       });
     } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
       next(error);
     }
   }
@@ -213,24 +230,25 @@ class PaymentController {
   async checkKhaltiMobile(req, res, next) {
     try {
       const { orderId } = req.body;
+
       const response = await Payment.findOne({
         orderId,
       });
-
+      console.log(response);
       if (!response) {
         return ExpressResponse.success(res, {
           message: "Payment not found",
         });
       }
-      if (response.paymentStatus !== paymentStatus.PENDING) {
+      if (response.paymentStatus == paymentStatus.PENDING) {
         return ExpressResponse.success(res, {
           message: "Payment pending",
         });
-      } else if (response.paymentStatus !== paymentStatus.PAID) {
+      } else if (response.paymentStatus == paymentStatus.PAID) {
         return ExpressResponse.success(res, {
           message: "Payment Success",
         });
-      } else if (response.paymentStatus !== paymentStatus.FAILED) {
+      } else if (response.paymentStatus == paymentStatus.FAILED) {
         return ExpressResponse.success(res, {
           message: "Payment Failed",
         });

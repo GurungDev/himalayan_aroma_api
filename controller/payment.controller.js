@@ -82,10 +82,17 @@ class PaymentController {
     orderID
   ) {
     try {
+      // let data = {
+      //   return_url: `http://${EnvConfig.ip_address}:${EnvConfig.port}/api/khalti-verify?transaction_uuid=${transaction_uuid}&orderID=${orderID}`,
+      //   website_url: `http://${EnvConfig.ip_address}:5173/`,
+      //   amount: amount,
+      //   purchase_order_id: transaction_uuid,
+      //   purchase_order_name,
+      // };
       let data = {
         return_url: `http://${EnvConfig.ip_address}:${EnvConfig.port}/api/khalti-verify?transaction_uuid=${transaction_uuid}&orderID=${orderID}`,
-        website_url: `http://${EnvConfig.ip_address}:5173/`,
-        amount: amount,
+        website_url: `http://localhost:5173/`,
+        amount: amount * 100,
         purchase_order_id: transaction_uuid,
         purchase_order_name,
       };
@@ -96,6 +103,7 @@ class PaymentController {
         },
       };
 
+      console.log(data);
       const response = await axios.post(EnvConfig.khaltiUrl, data, config);
       return { success: true, Data: response.data };
     } catch (error) {
@@ -115,7 +123,6 @@ class PaymentController {
       const config = {
         headers: { Authorization: `key ${EnvConfig.khaltiSecretKey}` },
       };
-      console.log("yeha xu ");
       const response = await axios.post(
         "https://dev.khalti.com/api/v2/epayment/lookup/",
         data,
@@ -147,11 +154,11 @@ class PaymentController {
         throw new ExpressError(404, "order not found.");
       }
 
-      if(order.status == orderStatus.PENDING) {
+      if (order.status == orderStatus.PENDING) {
         throw new ExpressError(400, "Payment already initiated.");
       }
 
-      if(order.status == orderStatus.PAID) {
+      if (order.status == orderStatus.PAID) {
         throw new ExpressError(400, "Order already paid.");
       }
 

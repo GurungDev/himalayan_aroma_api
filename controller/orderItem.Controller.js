@@ -41,7 +41,7 @@ class OrderItemsController {
       if (existingOrderItem) {
         // If item exists, update quantity and price
         existingOrderItem.quantity = item.quantity;
-        existingOrderItem.price = menu.price * existingOrderItem.quantity;
+        existingOrderItem.price = menu.price ;
         itemsToUpdate.push(existingOrderItem);
         existingItemsMap.delete(item.menuID.toString()); // Remove from map
       } else {

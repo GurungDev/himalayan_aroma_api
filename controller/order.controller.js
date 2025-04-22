@@ -18,8 +18,10 @@ class OrderController {
 
       const [responseOrder, countOrder] = await Promise.all([
         Order.find(query)
+          .sort("-createdAt")
           .limit(limit)
           .skip(skip)
+
           .populate({
             path: "table",
             select: "table_number",
@@ -85,6 +87,16 @@ class OrderController {
       await isTableReserved.save();
 
       return ExpressResponse.success(res, { data: newOrder });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async delete(req, res, next) {
+    try {
+      const { id } = req.params;
+      const order = await Order.findByIdAndDelete(id).lean();
+      return ExpressResponse.success(res, { data: order });
     } catch (error) {
       next(error);
     }

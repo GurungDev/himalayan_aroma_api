@@ -7,9 +7,7 @@ const adminMenuRouter = Router({ mergeParams: true });
 adminMenuRouter.post(
   "/",
   allowAdminOnly,
-
   uploadImage(),
-
   menuController.create
 );
 adminMenuRouter.post(

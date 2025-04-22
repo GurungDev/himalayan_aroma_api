@@ -50,7 +50,7 @@ class OrderItemsController {
           orderID: order._id,
           menuID: item.menuID,
           quantity: item.quantity,
-          price: menu.price * item.quantity,
+          price: menu.price ,
         });
       }
     }

@@ -95,7 +95,7 @@ class OrderController {
   async delete(req, res, next) {
     try {
       const { id } = req.params;
-      const order = await Order.findByIdAndDelete(id).lean();
+      const order = await Order.findByIdAndDelete(id);
       return ExpressResponse.success(res, { data: order });
     } catch (error) {
       next(error);

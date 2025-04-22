@@ -115,7 +115,7 @@ class OrderItemsController {
           message: "successfully deleted",
         });
       }
-      orderItem.price = orderItem.menuID.price * orderItem.quantity;
+      orderItem.price = orderItem.menuID.price ;
       const updatedOrderItem = await orderItem.save();
       return ExpressResponse.success(res, { data: updatedOrderItem });
     } catch (error) {

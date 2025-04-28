@@ -257,17 +257,13 @@ class PaymentController {
         });
       }
       if (response.paymentStatus == paymentStatus.PENDING) {
-        return ExpressResponse.success(res, {
-          message: "Payment pending",
-        });
+        throw new ExpressError(400, "Payment pending");
       } else if (response.paymentStatus == paymentStatus.PAID) {
         return ExpressResponse.success(res, {
           message: "Payment Success",
         });
       } else if (response.paymentStatus == paymentStatus.FAILED) {
-        return ExpressResponse.success(res, {
-          message: "Payment Failed",
-        });
+        throw new ExpressError(400, "Payment Failed");
       }
     } catch (error) {
       next(error);
